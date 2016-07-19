@@ -339,7 +339,7 @@
 				}
 			});
 			ractive_reference.observe('selection', function(newValue, oldValue, keypath) {
-				reference = newValue.book.toLowerCase() + "_" + pad(newValue.chapter, 3);
+				reference = newValue.book.toLowerCase().replace(/\s+/g, '') + "_" + pad(newValue.chapter, 3);
 				if (typeof user_id !== "undefined")
 					loadData();
 			});

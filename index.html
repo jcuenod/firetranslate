@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style type="text/css">
+	body {
+		margin: 4em 0;
+		padding: 0;
+	}
+	header {
+		background: #222;
+		font-weight: bold;
+		font-family: sans-serif;
+		margin: 0 0 1em 0;
+		padding: 0.7em 2em;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		list-style: none;
+		position: fixed;
+		right: 0;
+		left: 0;
+		top: 0;
+	}
+	header h1 {
+		flex: 0 1 auto;
+		margin: 0;
+		color: #ddd;
+		font-size: 20px;
+	}
+	header h1 span {
+		color: #f49304;
+	}
+	header nav {
+		flex: 0 1 auto;
+		margin: 0;
+	}
+	header nav > * {
+		position: relative;
+	}
+	header nav a,
+	header nav a:visited {
+		text-decoration: none;
+		color: #999;
+		margin: 0 1em;
+		font-size: 15px;
+	}
+	header nav a:hover {
+		color: #ccc;
+	}
+
+	header nav input[type="text"] {
+		padding: 5px;
+		border: solid 5px #c9c9c9;
+		transition: border 0.3s;
+	}
+	header nav input[type="text"]:focus,
+	header nav input[type="text"].focus {
+		border: solid 5px #969696;
+	}
+
+	content a,
+	content a:visited {
+		color: #465db0;
+		text-decoration: none;
+	}
+	content a:hover {
+		color: #68f;
+	}
+
+	.gk-word:after {
+		content: " ";
+	}
+	.lang-greek {
+		font-family: "SBL Greek";
+		font-size: 120%;
+	}
+	.lang-hebrew {
+		font-family: "Ezra SIL", "SBL Hebrew";
+		text-align: right !important;
+		font-size: 140%;
+	}
+
+	#targetTable {
+		font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+		border-collapse: collapse;
+		width: 90%;
+		max-width: 1000px;
+		margin: auto;
+		table-layout: fixed;
+	}
+	#targetTable td:first-child {
+	    width: 10px;
+	    padding: 0;
+	    text-align: center;
+	}
+
+	#targetTable td, #targetTable th {
+		border: 1px solid #ddd;
+		text-align: left;
+		padding: 8px;
+	}
+
+	#targetTable tr:nth-child(even){background-color: #f2f2f2}
+
+	#targetTable tr:hover {background-color: #f2fff2;}
+
+	#targetTable th {
+		padding-top: 12px;
+		padding-bottom: 12px;
+		background-color: #4CAF50;
+		color: white;
+	}
+
+	select:not([multiple]){
+		-webkit-appearance:none;
+		-moz-appearance:none;
+		background-position:right 50%;
+		background-repeat:no-repeat;
+		background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAMCAYAAABSgIzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NDZFNDEwNjlGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NDZFNDEwNkFGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NkU0MTA2N0Y3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo0NkU0MTA2OEY3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuGsgwQAAAA5SURBVHjaYvz//z8DOYCJgUxAf42MQIzTk0D/M+KzkRGPoQSdykiKJrBGpOhgJFYTWNEIiEeAAAMAzNENEOH+do8AAAAASUVORK5CYII=);
+		padding: 0.2em 1.5em 0.15em 0.5em;
+		font-size: 14px;
+	}
+
+	select {
+		border-radius:3px;
+	}
+
+	header {
+		transition: transform 0.3s ease-in-out;
+	}
+	.nav-up {
+		transform: translateY(-100%);
+	}
+	.nav-down {
+		transform: translateY(0%);
+	}
+	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ractive/0.7.3/ractive.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+	<script>
+		function pad(n, width, z) {
+			z = z || '0';
+			n = n + '';
+			return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+		}
+		var chapterData = {
+			"Genesis": 50,
+			"Exodus": 40,
+			"Leviticus": 27,
+			"Numbers": 36,
+			"Deuteronomy": 34,
+			"Joshua": 24,
+			"Judges": 21,
+			"Ruth": 4,
+			"1 Samuel": 31,
+			"2 Samuel": 24,
+			"1 Kings": 22,
+			"2 Kings": 25,
+			"1 Chronicles": 29,
+			"2 Chronicles": 36,
+			"Ezra": 10,
+			"Nehemiah": 13,
+			"Esther": 10,
+			"Job": 42,
+			"Psalms": 150,
+			"Proverbs": 31,
+			"Ecclesiastes": 12,
+			"Song of Songs": 8,
+			"Isaiah": 66,
+			"Jeremiah": 52,
+			"Lamentations": 5,
+			"Ezekiel": 48,
+			"Daniel": 12,
+			"Hosea": 14,
+			"Joel": 3,
+			"Amos": 9,
+			"Obadiah": 1,
+			"Jonah": 4,
+			"Micah": 7,
+			"Nahum": 3,
+			"Habakkuk": 3,
+			"Zephaniah": 3,
+			"Haggai": 2,
+			"Zechariah": 14,
+			"Malachi": 3,
+			"Matthew": 28,
+			"Mark": 16,
+			"Luke": 24,
+			"John": 21,
+			"Acts": 28,
+			"Romans": 16,
+			"1 Corinthians": 16,
+			"2 Corinthians": 13,
+			"Galatians": 6,
+			"Ephesians": 6,
+			"Philippians": 4,
+			"Colossians": 4,
+			"1 Thessalonians": 5,
+			"2 Thessalonians": 3,
+			"1 Timothy": 6,
+			"2 Timothy": 4,
+			"Titus": 3,
+			"Philemon": 1,
+			"Hebrews": 13,
+			"James": 5,
+			"1 Peter": 5,
+			"2 Peter": 3,
+			"1 John": 5,
+			"2 John": 1,
+			"3 John": 1,
+			"Jude": 1,
+			"Revelation": 22
+		}
+
+		var range = (l,r) => new Array(r - l).fill().map((_,k) => k + l);
+
+		var debounce;
+		var ractive_user;
+		var user_id;
+		var ractive_translation;
+		var just_loaded = true;
+		var userData = {
+		};
+		var reference = "matthew_001";
+		// Initialize Firebase
+		var config = {
+			apiKey: "AIzaSyAQZnXRYo_MPZJCPSdit2LU6iv2ujs1RPs",
+			authDomain: "firetranslate-5c0ca.firebaseapp.com",
+			databaseURL: "https://firetranslate-5c0ca.firebaseio.com",
+			storageBucket: "",
+		};
+		firebase.initializeApp(config);
+
+		function updateUserData() {
+			if (just_loaded)
+			{
+				//don't update
+				just_loaded = false;
+				return;
+			}
+			clearTimeout(debounce);
+			debounce = setTimeout(function() {
+				if (!user_id) {
+					console.log("need to be logged in smarty pants");
+					return
+				}
+				firebase.database().ref('users/' + user_id + "/" + reference).update(userData);
+			}, 1000);
+		}
+		function loadData() {
+			firebase.database().ref('/users/' + user_id + "/" + reference).once('value', function(snapshot) {
+				data = snapshot.val();
+				var setData = function(d)
+				{
+					userData = d;
+					just_loaded = true;
+					ractive_translation.set("list", userData);
+				}
+				if (data === null)
+				{
+					firebase.database().ref('bibledata/' + reference).once('value', function(snapshot) {
+						var data = snapshot.val();
+						setData(data);
+					});
+				}
+				else
+				{
+					setData(data);
+				}
+			});
+		}
+
+
+		var provider = new firebase.auth.GoogleAuthProvider();
+		provider.addScope('https://www.googleapis.com/auth/plus.login');
+
+		function login() {
+			firebase.auth().signInWithPopup(provider);
+			// .then(function(result) {
+			// 	// This gives you a Google Access Token. You can use it to access the Google API.
+			// 	// The signed-in user info.
+			// 	var u = result.user;
+			// 	user_id = u.uid;
+			// 	ractive_user.set("user", u);
+			// 	loadData();
+			// }).catch(function(error) {
+			// 	// Handle Errors here.
+			// 	var errorCode = error.code;
+			// 	var errorMessage = error.message;
+			// 	// The email of the user's account used.
+			// 	var email = error.email;
+			// 	// The firebase.auth.AuthCredential type that was used.
+			// 	var credential = error.credential;
+			// 	// ...
+			// });
+		}
+
+		function logout() {
+			firebase.auth().signOut();
+			// .then(function() {
+			// 	// Sign-out successful.
+			// 	user = null;
+			// 	user_id = null;
+			// 	var u = false;
+			// 	ractive_user.set("user", u);
+			// }, function(error) {
+			// 	// An error happened.
+			// });
+		}
+		$(document).on("ready", function() {
+			ractive_translation = new Ractive({
+				el: "#targetTable",
+				template: "#template",
+				data: {
+					list: userData
+				}
+			});
+			ractive_translation.observe('list', function(newValue, oldValue, keypath) {
+				updateUserData();
+			});
+
+			ractive_user = new Ractive({
+				el: "#userNav",
+				template: "#userDetails",
+				data: {
+					user: false
+				}
+			});
+
+			ractive_reference = new Ractive({
+				el: "#referenceDiv",
+				template: "#ractiveReference",
+				data: {
+					books: Object.keys(chapterData),
+					chapters: chapterData,
+					selection: { book: "Matthew", chapter: 1 },
+				}
+			});
+			ractive_reference.observe('selection', function(newValue, oldValue, keypath) {
+				reference = newValue.book.toLowerCase() + "_" + pad(newValue.chapter, 3);
+				if (typeof user_id !== "undefined")
+					loadData();
+			});
+
+
+
+
+
+
+			// Hide Header on on scroll down
+			var didScroll;
+			var lastScrollTop = 0;
+			var delta = 5;
+			var navbarHeight = $('header').outerHeight();
+
+			$(window).scroll(function(event){
+			    didScroll = true;
+			});
+
+			setInterval(function() {
+			    if (didScroll) {
+			        hasScrolled();
+			        didScroll = false;
+			    }
+			}, 250);
+
+			function hasScrolled() {
+			    var st = $(this).scrollTop();
+
+			    // Make sure they scroll more than delta
+			    if(Math.abs(lastScrollTop - st) <= delta)
+			        return;
+
+			    // If they scrolled down and are past the navbar, add class .nav-up.
+			    // This is necessary so you never see what is "behind" the navbar.
+			    if (st > lastScrollTop && st > navbarHeight){
+			        // Scroll Down
+			        $('header').removeClass('nav-down').addClass('nav-up');
+			    } else {
+			        // Scroll Up
+			        if(st + $(window).height() < $(document).height()) {
+			            $('header').removeClass('nav-up').addClass('nav-down');
+			        }
+			    }
+
+			    lastScrollTop = st;
+			}
+
+
+
+
+
+			firebase.auth().onAuthStateChanged(function(user) {
+				if (user) {
+					user_id = user.uid;
+					ractive_user.set("user", user);
+					loadData();
+				}
+				else
+				{
+					user_id = null;
+					ractive_user.set("user", false);
+					ractive_translation.set("list", {});
+				}
+			});
+		});
+	</script>
+	<title>FireTranslate</title>
+</head>
+
+<body>
+	<header>
+		<h1><span>fire</span>translate</h1>
+		<nav>
+			<span id="userNav">
+				<script id="userDetails" type="text/ractive">
+				{{#if user}}
+				<a href="#" id="logout" onclick="logout()">{{user.displayName}}</a>
+				{{else}}
+				<a href="#" id="login" onclick="login()">log in</a>
+				{{/if}}
+				</script>
+			</span>
+			<span id="referenceDiv">
+				<script id="ractiveReference" type="text/ractive">
+				<select value='{{selection.book}}'>
+				{{#books}}
+				<option>{{this}}</option>
+				{{/each}}
+				</select>
+				<select value='{{selection.chapter}}'>
+				{{#each Array(chapters[selection.book]):i}}
+				<option>{{i + 1}}</option>
+				{{/each}}
+				</select>
+				</script>
+			</span>
+		</nav>
+	</header>
+	<content>
+		<table id="targetTable">
+			<script id="template" type="text/ractive">
+				{{#if list}}
+					{{#each list.verses}}
+					{{#if @key > 0}}
+					<tr data-verse={{@key}}>
+						<td data-field="verse">
+							{{@key}}
+						</td>
+						{{#if words}}
+							<td width=100 data-field="sblgnt" class="lang-greek">
+								{{#each words}}
+									<span id={{wid}} class="gk-word">{{word}}</span>
+								{{/each}}
+							</td>
+						{{/if}}
+						{{#if lxx}}
+							<td width=100 data-field="lxx" class="lang-greek">
+								<span id={{wid}}>{{lxx}}</span>
+							</td>
+						{{/if}}
+						{{#if wlc}}
+							<td width=100 data-field="wlc" class="lang-hebrew">
+								{{wlc}}
+							</td>
+						{{/if}}
+
+						<td width=100 contenteditable="true" value={{this.translation}}></td>
+						<td width=100 contenteditable="true" value={{this.notes}}></td>
+					</tr>
+					{{/if}}
+					{{/each}}
+				{{else}}
+					<center>
+					Sorry, you must <a href="#" onclick="login()">log in</a> to use firetranslate.
+					</center>
+				{{/if}}
+			</script>
+		</table>
+	</content>
+	<footer>
+	</footer>
+</body>
+
+</html>

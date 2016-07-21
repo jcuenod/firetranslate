@@ -88,6 +88,8 @@ var ractive_user;
 var user_id;
 var ractive_translation;
 var just_loaded = true;
+just_loaded_array = [];
+var initialLoad = true;
 var userOptions = {
 	selection: defaultSelection
 };
@@ -109,6 +111,7 @@ function updateUserData() {
 		just_loaded = false;
 		return;
 	}
+	console.log("updateUserData");
 	clearTimeout(debounce);
 	debounce = setTimeout(function() {
 		if (!user_id) {
@@ -122,8 +125,10 @@ function loadData() {
 	firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {
 		data = snapshot.val();
 		var setData = function(d) {
+			console.log("setData");
 			userData = d;
 			just_loaded = true;
+			just_loaded_array = [];
 			ractive_translation.set("list", userData);
 		};
 		if (data === null)
@@ -151,6 +156,8 @@ function login() {
 function logout() {
 	firebase.auth().signOut();
 }
+
+var actualOldValue = {};
 $(document).on("ready", function() {
 	ractive_translation = new Ractive({
 		el: "#targetTable",
@@ -159,9 +166,29 @@ $(document).on("ready", function() {
 			list: userData
 		}
 	});
-	ractive_translation.observe('list', function(newValue, oldValue, keypath) {
-		updateUserData();
+	ractive_translation.observe('list.verses.*.translation list.verses.*.notes', function(newValue, oldValue, keypath) {
+		if (JSON.stringify(newValue)!=JSON.stringify(oldValue) && typeof newValue !== "undefined" && typeof oldValue !== "undefined")
+		{
+			if (just_loaded_array.indexOf(keypath) > -1)
+			{
+				updateUserData();
+			}
+			else
+			{
+				just_loaded_array.push(keypath);
+			}
+		}
 	});
+	// ractive_translation.observe('list.verses.*.translation', function(newValue, oldValue, keypath) {
+	// 	if (JSON.stringify(newValue)!=JSON.stringify(actualOldValue))
+	// 	{
+	// 		// actualOldValue = JSON.parse(JSON.stringify(newValue));
+	// 		// updateUserData();
+	// 	}
+	// 	else {
+	// 		console.log("true!");
+	// 	}
+	// });
 
 	ractive_user = new Ractive({
 		el: "#userNav",

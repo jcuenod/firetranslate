@@ -73,6 +73,7 @@ var chapterData = {
 	"Jude": 1,
 	"Revelation": 22
 };
+var prevent_update = false;
 var reference_string = "matthew_001";
 var defaultSelection = { book: "Matthew", chapter: 1 };
 var reference_object = {
@@ -87,13 +88,14 @@ var debounce = {};
 var ractive_user;
 var user_id;
 var ractive_translation;
-var just_loaded = true;
-just_loaded_array = [];
+var just_loaded_array = [];
+var just_set_userOptions = false;
 var initialLoad = true;
 var userOptions = {
 	selection: defaultSelection
 };
 var userData = {};
+var no_keys_pushed_yet = true;
 
 // Initialize Firebase
 var config = {
@@ -105,9 +107,9 @@ var config = {
 firebase.initializeApp(config);
 
 function updateUserData(keypath, newValue) {
-	if (just_loaded_array.indexOf(keypath) == -1)
+	if (no_keys_pushed_yet)
 	{
-		just_loaded_array.push(keypath);
+		console.log("no keys pushed yet");
 		return;
 	}
 
@@ -131,26 +133,25 @@ function updateUserData(keypath, newValue) {
 	}, 400);
 }
 function loadData() {
-	firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {
-		data = snapshot.val();
-		var setData = function(d) {
-			console.log("setData");
-			userData = d;
-			just_loaded = true;
-			just_loaded_array = [];
-			ractive_translation.set("list", userData);
-		};
-		if (data === null)
-		{
-			firebase.database().ref('bibledata/' + reference_string).once('value', function(snapshot) {
-				var data = snapshot.val();
-				setData(data);
-			});
-		}
-		else
-		{
-			setData(data);
-		}
+	var setData = function(d, reset_prevent) {
+		userData = $.extend(true, userData, d);
+		just_loaded_array = [];
+		ractive_translation.set("list", userData);
+		if (reset_prevent)
+			prevent_update = false;
+	};
+	firebase.database().ref('bibledata/' + reference_string).once('value', function(snapshot) {
+		no_keys_pushed_yet = true;
+		var data = snapshot.val();
+		userData = {};
+		setData(data);
+		firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {
+			data = snapshot.val();
+			if (data !== null)
+				setData(data, true);
+			else
+				prevent_update = false;
+		});
 	});
 }
 
@@ -176,21 +177,15 @@ $(document).on("ready", function() {
 		}
 	});
 	ractive_translation.observe('list.verses.*.translation list.verses.*.notes', function(newValue, oldValue, keypath) {
-		if (JSON.stringify(newValue)!=JSON.stringify(oldValue) && typeof newValue !== "undefined" && typeof oldValue !== "undefined")
+		if (prevent_update)
+			return;
+
+		// Don't bother if nothing has changed (or we're dealing with undefined vars)
+		if (JSON.stringify(newValue)!=JSON.stringify(oldValue) && typeof newValue !== "undefined")
 		{
 			updateUserData(keypath, newValue);
 		}
 	});
-	// ractive_translation.observe('list.verses.*.translation', function(newValue, oldValue, keypath) {
-	// 	if (JSON.stringify(newValue)!=JSON.stringify(actualOldValue))
-	// 	{
-	// 		// actualOldValue = JSON.parse(JSON.stringify(newValue));
-	// 		// updateUserData();
-	// 	}
-	// 	else {
-	// 		console.log("true!");
-	// 	}
-	// });
 
 	ractive_user = new Ractive({
 		el: "#userNav",
@@ -201,6 +196,7 @@ $(document).on("ready", function() {
 		}
 	});
 	ractive_user.observe('reference.selection', function(newValue, oldValue, keypath) {
+		prevent_update = true;
 		if (typeof newValue !== "undefined")
 		{
 			userOptions.selection = newValue;
@@ -208,7 +204,10 @@ $(document).on("ready", function() {
 			if (user_id)
 			{
 				loadData();
-				firebase.database().ref('users/' + user_id + "/options").update(userOptions);
+				if (!just_set_userOptions)
+					firebase.database().ref('users/' + user_id + "/options").update(userOptions);
+				else
+					just_set_userOptions = false;
 			}
 		}
 	});
@@ -264,6 +263,8 @@ $(document).on("ready", function() {
 			firebase.database().ref('/users/' + user_id + "/options").once('value', function(snapshot) {
 				var data = snapshot.val();
 				userOptions = data !== null ? data : userOptions;
+
+				just_set_userOptions = true;
 				ractive_user.set("reference.selection", userOptions.selection);
 			});
 		}
@@ -274,4 +275,6 @@ $(document).on("ready", function() {
 			ractive_translation.set("list", {});
 		}
 	});
+}).on("keyup mousedown", "html", function(){
+	no_keys_pushed_yet = false;
 });

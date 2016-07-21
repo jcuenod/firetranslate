@@ -73,6 +73,13 @@ var chapterData = {
 	"Jude": 1,
 	"Revelation": 22
 };
+var reference_string = "matthew_001";
+var defaultSelection = { book: "Matthew", chapter: 1 };
+var reference_object = {
+	books: Object.keys(chapterData),
+	chapters: chapterData,
+	selection: defaultSelection
+};
 
 var range = (l,r) => new Array(r - l).fill().map((_,k) => k + l);
 
@@ -81,9 +88,11 @@ var ractive_user;
 var user_id;
 var ractive_translation;
 var just_loaded = true;
-var userData = {
+var userOptions = {
+	selection: defaultSelection
 };
-var reference_string = "matthew_001";
+var userData = {};
+
 // Initialize Firebase
 var config = {
 	apiKey: "AIzaSyAQZnXRYo_MPZJCPSdit2LU6iv2ujs1RPs",
@@ -159,17 +168,20 @@ $(document).on("ready", function() {
 		template: "#userDetails",
 		data: {
 			user: false,
-			reference: {
-				books: Object.keys(chapterData),
-				chapters: chapterData,
-				selection: { book: "Matthew", chapter: 1 },
-			}
+			reference: reference_object
 		}
 	});
-	ractive_user.observe('reference', function(newValue, oldValue, keypath) {
-		reference_string = newValue.selection.book.toLowerCase().replace(/\s+/g, '') + "_" + pad(newValue.selection.chapter, 3);
-		if (typeof user_id !== "undefined")
-		loadData();
+	ractive_user.observe('reference.selection', function(newValue, oldValue, keypath) {
+		if (typeof newValue !== "undefined")
+		{
+			userOptions.selection = newValue;
+			reference_string = newValue.book.toLowerCase().replace(/\s+/g, '') + "_" + pad(newValue.chapter, 3);
+			if (user_id)
+			{
+				loadData();
+				firebase.database().ref('users/' + user_id + "/options").update(userOptions);
+			}
+		}
 	});
 
 
@@ -220,7 +232,11 @@ $(document).on("ready", function() {
 		if (user) {
 			user_id = user.uid;
 			ractive_user.set("user", user);
-			loadData();
+			firebase.database().ref('/users/' + user_id + "/options").once('value', function(snapshot) {
+				var data = snapshot.val();
+				userOptions = data !== null ? data : userOptions;
+				ractive_user.set("reference.selection", userOptions.selection);
+			});
 		}
 		else
 		{

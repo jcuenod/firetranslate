@@ -83,7 +83,7 @@ var reference_object = {
 
 var range = (l,r) => new Array(r - l).fill().map((_,k) => k + l);
 
-var debounce;
+var debounce = {};
 var ractive_user;
 var user_id;
 var ractive_translation;
@@ -104,22 +104,31 @@ var config = {
 };
 firebase.initializeApp(config);
 
-function updateUserData() {
-	if (just_loaded)
+function updateUserData(keypath, newValue) {
+	if (just_loaded_array.indexOf(keypath) == -1)
 	{
-		//don't update
-		just_loaded = false;
+		just_loaded_array.push(keypath);
 		return;
 	}
-	console.log("updateUserData");
-	clearTimeout(debounce);
-	debounce = setTimeout(function() {
+
+	if (typeof debounce[keypath] !== "undefined")
+	{
+		console.log("skipped: " + keypath);
+		clearTimeout(debounce[keypath]);
+	}
+
+	debounce[keypath] = setTimeout(function() {
 		if (!user_id) {
 			console.log("need to be logged in smarty pants");
 			return;
 		}
-		firebase.database().ref('users/' + user_id + "/" + reference_string).update(userData);
-	}, 1000);
+		var data = {};
+		var keyName = keypath.slice(keypath.lastIndexOf(".") + 1);
+		data[keyName] = newValue;
+		var path = 'users/' + user_id + "/" + reference_string + "/" + keypath.slice(5, keypath.lastIndexOf(".")).replace(/\./g, "/");
+		firebase.database().ref(path).update(data);
+		console.log("updateUserData: " + keypath);
+	}, 400);
 }
 function loadData() {
 	firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {
@@ -169,14 +178,7 @@ $(document).on("ready", function() {
 	ractive_translation.observe('list.verses.*.translation list.verses.*.notes', function(newValue, oldValue, keypath) {
 		if (JSON.stringify(newValue)!=JSON.stringify(oldValue) && typeof newValue !== "undefined" && typeof oldValue !== "undefined")
 		{
-			if (just_loaded_array.indexOf(keypath) > -1)
-			{
-				updateUserData();
-			}
-			else
-			{
-				just_loaded_array.push(keypath);
-			}
+			updateUserData(keypath, newValue);
 		}
 	});
 	// ractive_translation.observe('list.verses.*.translation', function(newValue, oldValue, keypath) {

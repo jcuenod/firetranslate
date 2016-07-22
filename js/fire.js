@@ -134,6 +134,13 @@ function updateUserData(keypath, newValue) {
 }
 function loadData() {
 	var setData = function(d, reset_prevent) {
+		if (!Array.isArray(d.verses))
+		{
+			var key = Object.keys(d.verses)[0];
+			var value = d.verses[key];
+			d.verses = [];
+			d.verses[key] = value;
+		}
 		userData = $.extend(true, userData, d);
 		just_loaded_array = [];
 		ractive_translation.set("list", userData);

@@ -40,10 +40,9 @@
 			<script id="template" type="text/ractive">
 				{{#if list}}
 					{{#each list.verses}}
-					{{#if @key > 0}}
-					<tr data-verse={{@key}}>
+					<tr data-verse={{verse}}>
 						<td data-field="verse">
-							{{@key}}
+							{{verse}}
 						</td>
 						{{#if words}}
 							<td width=100 data-field="sblgnt" class="lang-greek">
@@ -52,21 +51,20 @@
 								{{/each}}
 							</td>
 						{{/if}}
-						{{#if lxx}}
-							<td width=100 data-field="lxx" class="lang-greek">
-								<span id={{wid}}>{{lxx}}</span>
-							</td>
-						{{/if}}
 						{{#if wlc}}
 							<td width=100 data-field="wlc" class="lang-hebrew">
 								{{wlc}}
+							</td>
+						{{/if}}
+						{{#if sbl}}
+							<td width=100 data-field="sblgnt" class="lang-greek">
+								{{sbl}}
 							</td>
 						{{/if}}
 
 						<td width=100 contenteditable="true" value={{this.translation}}></td>
 						<td width=100 contenteditable="true" value={{this.notes}}></td>
 					</tr>
-					{{/if}}
 					{{/each}}
 				{{else}}
 					<center>

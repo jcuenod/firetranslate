@@ -174,7 +174,6 @@ function logout() {
 	firebase.auth().signOut();
 }
 
-var actualOldValue = {};
 $(document).on("ready", function() {
 	ractive_translation = new Ractive({
 		el: "#targetTable",
@@ -190,7 +189,8 @@ $(document).on("ready", function() {
 		// Don't bother if nothing has changed (or we're dealing with undefined vars)
 		if (JSON.stringify(newValue)!=JSON.stringify(oldValue) && typeof newValue !== "undefined")
 		{
-			updateUserData(keypath, newValue);
+			if (!!oldValue)
+				updateUserData(keypath, newValue);
 		}
 	});
 

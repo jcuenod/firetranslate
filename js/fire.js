@@ -150,6 +150,21 @@ function loadData() {
 	firebase.database().ref('bibledata/' + reference_string).once('value', function(snapshot) {
 		no_keys_pushed_yet = true;
 		var data = snapshot.val();
+
+		// The Tanach data has some superscriptions to help the user but I don't
+		// want them at this stage (they have no explanations). So we just
+		// remove them at this point. We can add them with bdi later...
+		data.verses.map(function(obj){
+			if ('wlc' in obj)
+			{
+				// we also need to use triple braces in the html {{{wlc}}}
+				// ractive will not allow html to display...
+				// obj.wlc = obj.wlc.replace(/(\[.+?\])/g,"<bdi>$1</bdi>");
+				obj.wlc = obj.wlc.replace(/(\[.+?\])/g,"");
+			}
+			return obj;
+		});
+
 		userData = {};
 		setData(data);
 		firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {

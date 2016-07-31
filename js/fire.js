@@ -1,4 +1,5 @@
 /*jshint esversion: 6 */
+var fraction_window_height = 0;
 
 function pad(n, width, z) {
 	z = z || '0';
@@ -105,6 +106,13 @@ var config = {
 	storageBucket: "",
 };
 firebase.initializeApp(config);
+
+function reset_fraction_window_height()
+{
+	fraction_window_height = $( document ).height() / 5;
+	fraction_window_height = fraction_window_height < $("header").height() ? $("header").height() * 1.4 : fraction_window_height;
+	console.log(fraction_window_height);
+}
 
 function updateUserData(keypath, newValue) {
 	if (no_keys_pushed_yet)
@@ -298,6 +306,37 @@ $(document).on("ready", function() {
 			ractive_translation.set("list", {});
 		}
 	});
+
+	reset_fraction_window_height();
 }).on("keyup mousedown", "html", function(){
 	no_keys_pushed_yet = false;
-});
+}).on("resize", window, function(){
+	reset_fraction_window_height();
+}).on("mousemove", "html", throttle(function(e){
+	if (e.originalEvent.movementY < -6 && e.clientY < fraction_window_height)
+		$('header').removeClass('nav-up').addClass('nav-down');
+},100, this));
+
+
+function throttle(fn, threshhold, scope) {
+	threshhold || (threshhold = 250);
+	var last,
+			deferTimer;
+	return function () {
+		var context = scope || this;
+
+		var now = +new Date,
+				args = arguments;
+		if (last && now < last + threshhold) {
+			// hold on to it
+			clearTimeout(deferTimer);
+			deferTimer = setTimeout(function () {
+				last = now;
+				fn.apply(context, args);
+			}, threshhold);
+		} else {
+			last = now;
+			fn.apply(context, args);
+		}
+	};
+}

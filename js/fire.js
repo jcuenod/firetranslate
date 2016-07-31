@@ -165,6 +165,7 @@ function loadData() {
 			return obj;
 		});
 
+		$('body, html').animate({ scrollTop: 0 }, 500);
 		userData = {};
 		setData(data);
 		firebase.database().ref('/users/' + user_id + "/" + reference_string).once('value', function(snapshot) {

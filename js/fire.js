@@ -144,10 +144,13 @@ function loadData() {
 	var setData = function(d, reset_prevent) {
 		if (!Array.isArray(d.verses))
 		{
-			var key = Object.keys(d.verses)[0];
-			var value = d.verses[key];
-			d.verses = [];
-			d.verses[key] = value;
+			var result = [];
+			Object.keys(d.verses).forEach(function(value, key) {
+				if (d.verses.hasOwnProperty(value)) {
+					result[value] = d.verses[value];
+				}
+			});
+			d.verses = result;
 		}
 		userData = $.extend(true, userData, d);
 		just_loaded_array = [];
